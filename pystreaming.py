@@ -32,6 +32,7 @@ class streamingThread(threading.Thread):
         self.c.setopt(pycurl.USERPWD, "%s:%s" % ("admin", "brian123"))
         self.mode = 1
         self.exit = False
+        self.clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
 
     def checkInput(self):
         params = {'PanSingleMoveDegree': '5',
@@ -45,8 +46,8 @@ class streamingThread(threading.Thread):
             newParams.update({'PanTiltSingleMove': directions[key]})
             self.c.setopt(pycurl.URL, 'http://' + self.ip + '/pantiltcontrol.cgi' + '?' + urllib.urlencode(newParams))
             self.c.perform()
-        elif key in videoModes:
-            self.mode = videoModes[key]
+        elif key == ord('z'):
+            self.mode = (self.mode + 1) % 3
 
         return False
 
@@ -67,10 +68,14 @@ class streamingThread(threading.Thread):
 
                 frame = cv2.imdecode(np.fromstring(jpg, dtype=np.uint8), cv2.CV_LOAD_IMAGE_COLOR)
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+                gray = self.clahe.apply(gray)
                 ret, thresh = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
+
                 canny = cv2.Canny(thresh, 100, 200)
-                if self.mode == 1:
+                if self.mode == 0:
                     cv2.imshow(self.winName, frame)
+                elif self.mode == 1:
+                    cv2.imshow(self.winName, gray)
                 elif self.mode == 2:
                     cv2.imshow(self.winName, canny)
 
@@ -89,4 +94,5 @@ def main():
     print "Exiting Main Thread"
 
 
-main()
+if __name__ == '__main__':
+    main()
