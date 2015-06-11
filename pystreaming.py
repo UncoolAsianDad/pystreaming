@@ -12,13 +12,6 @@ directions = {
     ord('e'): 4
 }
 
-videoModes = {
-    ord('1'): 1,
-    ord('2'): 2
-}
-
-windowCount = 1
-
 
 class streamingThread(threading.Thread):
     def __init__(self, ip):
@@ -48,6 +41,10 @@ class streamingThread(threading.Thread):
             self.c.perform()
         elif key == ord('z'):
             self.mode = (self.mode + 1) % 3
+        elif key in xrange(ord('1'), ord('9'), 1):
+            newParams = {'PanTiltPresetPositionMove': key - ord('0')}
+            self.c.setopt(pycurl.URL, 'http://' + self.ip + '/pantiltcontrol.cgi' + '?' + urllib.urlencode(newParams))
+            self.c.perform()
 
         return False
 
