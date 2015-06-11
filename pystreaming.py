@@ -17,7 +17,7 @@ class streamingThread(threading.Thread):
     def __init__(self, ip):
 
         threading.Thread.__init__(self)
-        self.winName = "IPCamera" + ip
+        self.winName = "IPCamera " + ip
 
         self.ip = ip
         self.c = pycurl.Curl()
